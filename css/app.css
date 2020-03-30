@@ -1,0 +1,67 @@
+
+/* ================================================= */
+/* *                  Formulário                   * */
+/* ================================================= */
+#form-tabela{
+    background: whitesmoke;
+    border-radius: 5px;
+}
+#form-tabela  .badge.badge-info{
+    transition: ease .2s all;
+    -webkit-transition: ease .2s all;
+    animation: novoCampo .3s ease;
+}
+#form-tabela  .badge.badge-info .badge-danger{
+    display: none;
+    transition: ease .2s all;
+    -webkit-transition: ease .2s all;
+}
+#form-tabela  .badge-info:hover{
+    transform: scale(1.1);
+}
+#form-tabela  .badge.badge-info:hover .badge-danger{
+    display: inline-block;
+}
+#form-tabela  .badge.badge-info .badge-danger:hover{
+    transform: scale(1.1);
+    background: #f18d8d;
+    cursor: pointer;
+}
+#form-tabela .remove-todos{
+    opacity: .7;
+    transition: ease all .2s;
+    -webkit-transition: ease all .2s;
+}
+#form-tabela .remove-todos:hover{
+    cursor: pointer;
+    opacity: 1;
+}
+.badge-close {
+    margin: -11px -26px 10px 10px;
+    color: white !important;
+    background: #dedada;
+}
+.badge-close:hover{
+    color: grey !important;
+}
+@keyframes novoCampo{
+    0%{transform: scale(.9);}
+    50%{ transform: scale(1.1);}
+    100%{ transform: scale(1);}
+}
+
+/* ================================================= */
+/* *                  Tabela                       * */
+/* ================================================= */
+.tabela th img{width: 10px;}
+.tabela th img.desc{
+    transform: rotate(180deg);
+    padding-top: 6px;
+}
+.input-form-table{
+    padding-left: 5px !important;
+    padding-right: 0px !important;
+}
+.edit-item{
+    padding: 8px 0px 0px 7px !important;
+}

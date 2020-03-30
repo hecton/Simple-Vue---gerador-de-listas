@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista</title>
+
+    <!-- estilos da pagina. -->
+    <link rel="stylesheet" href="boostrap/bootstrap.css">
+
+    <!-- estilos da aplicação. -->
+    <link rel="stylesheet" href="css/app.css">
+</head>
+
+<body>
+    <div id="app">
+        <div class="m-3" style="margin-top: 30px">
+            <div class="row">
+                <!-- selecionar tabelas -->
+                <div class="col-md-3">
+                    <select class="form-control" v-model="tabelaSelecionada">
+                        <option value="null" disabled>Selecione uma Tabela</option>
+                        <option 
+                            v-for="(tabela, key) in listaTabelas"
+                            :key="key"
+                            :value="key">
+                            {{tabela}}
+                        </option>
+                    </select>
+                </div>
+
+                <div class="col-md-9">
+                    <!-- botão de adicionar tabela -->
+                    <a class="btn btn-primary text-light" data-toggle="collapse" data-target="#form-tabela" aria-expanded="false" aria-controls="form-tabela">Adicionar</a>
+                    <!-- botão de remover tabela -->
+                    <a class="btn btn-danger text-light" @click="removeTabela" v-if="tabelaSelecionada != null">Remover Tabela</a>
+                    <!-- Voltar -->
+                    <a class="btn btn-warning text-light" @click="Backup">Voltar</a>
+                </div>
+            </div>
+
+            <!-- formulário de tabelas -->
+            <div class="row mt-4 ml-1 mr-1 collapse p-3" id="form-tabela">
+                <div class="col-md-12">
+                    <a class="badge float-right badge-close"
+                        data-toggle="collapse" 
+                        data-target="#form-tabela" 
+                        aria-controls="form-tabela">
+                        X
+                    </a>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Nome da tabela" v-model="nome">
+                    </div>
+                </div>
+                <div class="col-md-5">
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Nome do campo" v-model="campo" @keyup.enter="addCampo">
+                    </div>
+                </div>
+                
+                <div class="col-md-3">
+                    <button class="btn btn-info text-light" 
+                        @click="addCampo()"
+                        :disabled="campo == ''">
+                        Adicionar
+                    </button>
+                    <button class="btn btn-success text-light ml-1" 
+                        data-toggle="collapse" 
+                        data-target="#form-tabela" 
+                        aria-controls="form-tabela"
+                        :disabled="!campos.length > 0 || nome == '' || tabelas.includes(nome)"
+                        @click="criarTabela">
+                        Salvar tabela
+                    </button>
+                </div>
+
+                <!-- Opções semi prontas -->
+                <div class="col-md-12 mb-3">
+                    <a class="btn btn-info btn-sm text-light"
+                        data-toggle="tooltip" title="Adiciona: Nome, Marca, Link, Descrição, Preço"
+                        @click="addCampo(['Nome', 'Marca', 'Link', 'Descriçao', 'Preço'])">
+                        Add Base
+                    </a>
+                    <a class="btn btn-info btn-sm text-light"
+                        data-toggle="tooltip" title="Adiciona: Nome"
+                        @click="addCampo(['Nome'])">
+                        Nome
+                    </a>
+                    <a class="btn btn-info btn-sm text-light"
+                        data-toggle="tooltip" title="Adiciona: Nome"
+                        @click="addCampo(['Marca'])">
+                        Marca
+                    </a>
+                    <a class="btn btn-info btn-sm text-light"
+                        data-toggle="tooltip" title="Adiciona: Preço"
+                        @click="addCampo(['Preço'])">
+                        Preço
+                    </a>
+                    <a class="btn btn-info btn-sm text-light"
+                        data-toggle="tooltip" title="Adiciona: Descriçao"
+                        @click="addCampo(['Descriçao'])">
+                        Descriçao
+                    </a>
+                    <a class="btn btn-info btn-sm text-light"
+                        data-toggle="tooltip" title="Adiciona: Link de redirecionamento"
+                        @click="addCampo(['Link'])">
+                        Link
+                    </a>
+                    <a class="btn btn-info btn-sm text-light"
+                        data-toggle="tooltip" title="Adiciona: Loja"
+                        @click="addCampo(['Loja'])">
+                        Loja
+                    </a>
+                    <a class="btn btn-info btn-sm text-light"
+                        data-toggle="tooltip" title="Adiciona: Imagem"
+                        @click="addCampo(['Imagem'])">
+                        Imagem
+                    </a>
+                </div>
+
+                <!-- itens adiconados -->
+                <div class="col-md-12">
+                    <span class="badge badge-info mr-1" v-for="(campo, key) in campos" :key="key">
+                        {{campo}}
+                        <span class="badge badge-danger" @click="removeCampo(key)">X</span>
+                    </span>
+
+                    <span class="badge badge-danger remove-todos" 
+                        v-if="campos.length > 0"
+                        @click="campos = []">
+                        Remover todos
+                    </span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- tabela -->
+        <div class="row mt-5 ml-1 mr-1" v-if="tabelaSelecionada != null">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <input type="text" class="form-control" placeholder="Pesquisar" v-model="pesquisa">
+                </div>
+            </div>
+
+            <div class="col-md-12">
+                <table class="table table-bordered table-striped tabela">
+                    <thead>
+                        <tr>
+                            <th 
+                                v-for="(coluna, key) in tabelas[tabelaSelecionada]['header']"
+                                :key="key"
+                                @click="ordena(key)">
+                                {{coluna}}
+                                <img v-if="ordem == key" :class="{desc: desc}" src="img/ord.svg">
+                            </th>
+                            <th>Controle</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <!-- lista de dados -->
+                        <tr v-for="item in  listaFiltrada" :key="item[0]">
+                            <td v-for="i in (1, item.length-1)">
+                                <a 
+                                    href="#"
+                                    v-if="['link', 'image', 'img'].includes(tabelas[tabelaSelecionada].header[i-1].toLowerCase()) && item[i] != ''"
+                                    :href="item[i]"
+                                    target="_black">
+                                    Abrir    
+                                </a>
+                                <template v-else> {{item[i]}}</template>
+                            </td>
+
+                            <td class="edit-item">
+                                <a class="btn btn-info btn-sm text-light" @click="SelectEditItemTabela(item[0])">Editar</a>
+                                <a class="btn  btn-danger btn-sm text-light" @click="removeItemTabela(item[0])">Remover</a>
+                            </td>
+                        </tr>
+
+                        <!-- formulário. -->
+                        <tr>
+                            <td 
+                                v-for="(input, key) in formTab"
+                                class="input-form-table">
+                                
+                                <input 
+                                    v-model="formTab[key]"
+                                    type="list" 
+                                    :list="'formTab'+key"
+                                    :class="{
+                                        'money': ['preço', 'valor'].includes(tabelas[tabelaSelecionada].header[key].toLowerCase())
+                                    }">
+
+                                <datalist 
+                                    v-if="!['link', 'preço'].includes(tabelas[tabelaSelecionada].header[key].toLowerCase())"
+                                    :id="'formTab'+key">
+                                    
+                                    <option 
+                                        v-for="item in formTabSugestions[key]"
+                                        :value="item"> {{item}}</option>
+                                </datalist>
+                                
+                            </td>
+                            <td>
+                                <a class="btn btn-success btn-sm text-light"
+                                    @click="addItemTabela">
+                                    {{ editKey == null? 'Adicionar' : 'Salvar'}}
+                                </a>
+                                <a class="btn btn-warning btn-sm text-light"
+                                    @click="cancelarEdicao"
+                                    v-if="editKey != null">
+                                    Cancelar
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+
+<!-- framework -->
+<script src="js/vue.js"></script>
+
+<!-- plugins -->
+<script src="js/jquery.js"></script>
+<script src="js/jquery.mask.js"></script>
+<script src="boostrap/popper.js"></script>
+<script src="boostrap/bootstrap.js"></script>
+
+<!-- script da aplicação. -->
+<script src="js/app.js"></script>
+
+<!-- inicializações. -->
+<script>
+$(function () {$('[data-toggle="tooltip"]').tooltip()})
+$(document).ready(function(){
+  $('.date').mask('00/00/0000');
+  $('.time').mask('00:00:00');
+  $('.money').mask('000.000.000.000.000,00', {reverse: true});
+  $('.money2').mask("#.##0,00", {reverse: true});
+  $('.percent').mask('##0,00%', {reverse: true});
+});
+</script>
+</html>
