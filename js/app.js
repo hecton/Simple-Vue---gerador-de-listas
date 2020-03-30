@@ -32,7 +32,8 @@ var app = new Vue({
 
     watch: {
         tabelaSelecionada(){
-            this.formTab = this.tabelas[this.tabelaSelecionada].header.map(data => '')
+            this.formTab = this.tabelas[this.tabelaSelecionada].header.map(data => '');
+            this.ordem = 0;
 
             //pega os dados para as sugestões.
             this.formTabSugestions = this.formTab.map(i => []);
@@ -132,10 +133,24 @@ var app = new Vue({
                 this.editItemTabela();
             else{
                 this.tabelas[this.tabelaSelecionada].data.push(this.formTab);
+                this.AtualizaSugestao(this.formTab);
+
                 this.formTab = this.tabelas[this.tabelaSelecionada].header.map(data => '');
                 this.salvar();
             }
 
+        },
+
+        /**
+         * Atualiza a sugestções com os novos valores adicionados.
+         * @param data 
+         */
+        AtualizaSugestao(data){
+            data.forEach((item, key) => {
+                if(!this.formTabSugestions[key].includes(item)){
+                    this.formTabSugestions[key].push(item);
+                }
+            });
         },
 
         /**
@@ -162,6 +177,7 @@ var app = new Vue({
         editItemTabela(){
             if(this.editKey != null){
                 this.$set(this.tabelas[this.tabelaSelecionada].data, this.editKey, this.formTab);
+                this.AtualizaSugestao(this.formTab);
                 this.editKey = null;
                 this.formTab = this.tabelas[this.tabelaSelecionada].header.map(coluna => '');
                 this.salvar();
